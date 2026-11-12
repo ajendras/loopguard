@@ -1,0 +1,90 @@
+{
+  "name": "Simple Safety Policy",
+  "description": "Balanced policy for shopping and research agents. Blocks dangerous domains, requires approval for payments and high-risk actions, and protects PII.",
+  "version": "1.0.0",
+  "defaultAction": "approve",
+  "rules": [
+    {
+      "id": "rule-default-1",
+      "name": "Block high-risk financial domains",
+      "description": "Prevent any interaction with banking, crypto exchanges, or payment processors",
+      "type": "domain",
+      "condition": {
+        "operator": "in_list",
+        "value": [
+          "coinbase.com",
+          "binance.com",
+          "kraken.com",
+          "paypal.com",
+          "chase.com",
+          "bankofamerica.com",
+          "stripe.com/pay"
+        ]
+      },
+      "action": "deny",
+      "priority": 100,
+      "enabled": true
+    },
+    {
+      "id": "rule-default-2",
+      "name": "Require approval for checkout flows",
+      "description": "Any submit action on a checkout or payment page must be reviewed by a human",
+      "type": "action_type",
+      "condition": {
+        "operator": "equals",
+        "value": "submit"
+      },
+      "action": "require_approval",
+      "priority": 85,
+      "enabled": true
+    },
+    {
+      "id": "rule-default-3",
+      "name": "Risk threshold enforcement",
+      "description": "Actions scoring 70 or higher require explicit human approval",
+      "type": "risk_threshold",
+      "condition": {
+        "operator": "greater_than",
+        "value": 70
+      },
+      "action": "require_approval",
+      "priority": 75,
+      "enabled": true
+    },
+    {
+      "id": "rule-default-4",
+      "name": "Protect PII",
+      "description": "Any action that appears to transmit personally identifiable information is blocked",
+      "type": "pii",
+      "condition": {
+        "operator": "contains_pii",
+        "value": true
+      },
+      "action": "deny",
+      "priority": 95,
+      "enabled": true
+    },
+    {
+      "id": "rule-default-5",
+      "name": "Safe navigation default",
+      "description": "Navigation to allow-listed retail domains is permitted without review",
+      "type": "domain",
+      "condition": {
+        "operator": "in_list",
+        "value": [
+          "amazon.com",
+          "example.com",
+          "shop.example.com"
+        ]
+      },
+      "action": "approve",
+      "priority": 20,
+      "enabled": true
+    }
+  ],
+  "piiPatterns": {
+    "credit_card": "\\b(?:\\d[ -]*?){13,16}\\b",
+    "email": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+    "phone": "\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}"
+  }
+}
